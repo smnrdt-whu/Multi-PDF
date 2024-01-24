@@ -1,12 +1,14 @@
 import streamlit as st
 from PyPDF2 import PdfReader
-from langchain.text_splitter import CharacterTextSplitter
+from langchain.text_splitter import CharacterTextSplitter, SentenceTransformersTokenTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from htmlTemplates import css, bot_template, user_template
+#import chromadb
+#from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
 #https://www.youtube.com/watch?v=dXxQ0LR-3Hg
 #Limitations:
@@ -22,9 +24,16 @@ def get_pdf_text(pdf_docs):
     return text
 
 def get_text_chunks(text):
+    # Chunk size and overlap is a hyperparameter that can be tuned to improve performance
     text_splitter = CharacterTextSplitter(separator="\n", chunk_size=1000, chunk_overlap=200, length_function=len)
     chunks = text_splitter.split_text(text)
-    return chunks
+    token_splitter = SentenceTransformersTokenTextSplitter(chunk_overlap=0, tokens_per_chunk=256)
+    token_split_texts = []
+    for text in chunks:
+        token_split_texts += token_splitter.split_text(text)
+    #embedding_function = SentenceTransformerEmbeddingFunction()
+    #chroma_client = chromadb.Client()
+    return token_split_texts
 
 def get_vectorstore(text_chunks):
     embeddings = OpenAIEmbeddings(openai_api_key=key)
