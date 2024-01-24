@@ -8,7 +8,6 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from htmlTemplates import css, bot_template, user_template
 
-#HUGGINGFACEHUB_API_TOKEN="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"
 #C:/Users/simon.rudat/OneDrive - WHU/Promotion/1st Project/Multi PDF Python Script
 #https://www.youtube.com/watch?v=dXxQ0LR-3Hg
 #Limitations:
@@ -29,7 +28,8 @@ def get_text_chunks(text):
     return chunks
 
 def get_vectorstore(text_chunks):
-    embeddings = OpenAIEmbeddings(openai_api_key="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")
+    # TODO: Add your OpenAI API key in quotation marks
+    embeddings = OpenAIEmbeddings(openai_api_key="")
     vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
     return vectorstore
 
