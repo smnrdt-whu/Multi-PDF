@@ -46,6 +46,15 @@ def handle_userinput(user_question):
         else:
             st.write(bot_template.replace("{{MSG}}", message.content), unsafe_allow_html=True)
     
+def process_documents():
+    # get pdf test
+    raw_text=get_pdf_text(pdf_docs)
+    # get the text chunks
+    text_chunks = get_text_chunks(raw_text)
+    # create vector store
+    vectorstore = get_vectorstore(text_chunks)
+    # create conversation chain
+    st.session_state.conversation = get_conversation_chain(vectorstore)
 
 st.set_page_config(page_title="Chat wth multiple PDFs", page_icon=":books:")
 
@@ -64,24 +73,12 @@ key = st.text_input("Please enter your OpenAI API key:")
 if key != "":
     st.write("✅")
 
-st.subheader("Your documents")
-pdf_docs=st.file_uploader("Uplolad your PDFs here and click on 'Process'", accept_multiple_files=True)
-if st.button("Process"):
-    with st.spinner("Processing"):
-        # get pdf test
-        raw_text=get_pdf_text(pdf_docs)
-            
-        # get the text chunks
-        text_chunks = get_text_chunks(raw_text)
-            
-        # create vector store
-        vectorstore = get_vectorstore(text_chunks)
-            
-        # create conversation chain
-        st.session_state.conversation = get_conversation_chain(vectorstore)
-        st.write("✅")
+#st.subheader("Your documents")
+pdf_docs=st.file_uploader("Uplolad your PDFs here", accept_multiple_files=True)
+if len(pdf_docs) != 0:
+    st.write("✅")
 
 # Prompt input
-user_question = st.text_input("Ask a question about your documents:")
+user_question = st.text_input("Ask a question about your documents:", on_change=process_documents)
 if user_question:
     handle_userinput(user_question)
