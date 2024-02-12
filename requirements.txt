@@ -6,6 +6,6 @@ sentence-transformers==2.2.2
 openai==1.7.2
 tiktoken==0.5.2
 faiss-cpu==1.7.4
-hugginface-hub==0.20.*
+hugginface-hub==0.20.2
 InstructorEmbedding==1.0.1
 sentence-transformers==2.2.2
