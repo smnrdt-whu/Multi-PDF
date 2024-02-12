@@ -1,13 +1,14 @@
 import streamlit as st
 from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter, SentenceTransformersTokenTextSplitter
-from langchain.embeddings import OpenAIEmbeddings, HuggingFaceInstructEmbeddings
+from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from htmlTemplates import css, bot_template, user_template
-from langchain.llms import HuggingFaceHub
+#import chromadb
+#from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 
 #https://www.youtube.com/watch?v=dXxQ0LR-3Hg
 #Limitations:
@@ -30,22 +31,17 @@ def get_text_chunks(text):
     token_split_texts = []
     for text in chunks:
         token_split_texts += token_splitter.split_text(text)
+    #embedding_function = SentenceTransformerEmbeddingFunction()
+    #chroma_client = chromadb.Client()
     return token_split_texts
 
 def get_vectorstore(text_chunks):
-    if model=='Hugging Face (free)':
-        embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
-    else:
-        embeddings = OpenAIEmbeddings(openai_api_key=key)
-    embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+    embeddings = OpenAIEmbeddings(openai_api_key=key)
     vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
     return vectorstore
 
 def get_conversation_chain(vectorstore):
-    if model=='Hugging Face (free)':
-        llm = HuggingFaceHub(huggingfacehub_api_token=key, repo_id="google/flan-t5-xxl", model_kwargs={"temperature":0.5, "max_length":512})
-    else:
-        llm = ChatOpenAI(openai_api_key=key)
+    llm = ChatOpenAI(openai_api_key=key)
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     conversation_chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=vectorstore.as_retriever(), memory=memory)
     return conversation_chain
@@ -68,9 +64,6 @@ def process_documents():
     vectorstore = get_vectorstore(text_chunks)
     # create conversation chain
     st.session_state.conversation = get_conversation_chain(vectorstore)
-    
-def disable():
-    st.session_state.disabled = True
 
 st.set_page_config(page_title="Chat wth multiple PDFs", page_icon=":books:")
 
@@ -81,21 +74,17 @@ if "conversation" not in st.session_state:
     st.session_state.conversation = None
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = None
-if "disabled" not in st.session_state:
-    st.session_state.disabled = False
 
 st.header("Chat with multiple PDFs :books:")
 
-# Pick preferred model
-model = st.radio(label="Pick your preferred model:", options=['Hugging Face (free)', 'OpenAI (high performance)'], disabled=st.session_state.disabled)
-# API key input
-key = st.text_input("Enter your API key:", on_change=disable, disabled=st.session_state.disabled)
-if key:
+# OpenAI API key input
+key = st.text_input("Please enter your OpenAI API key:")
+if key != "":
     st.write("✅")
 
 #st.subheader("Your documents")
-pdf_docs=st.file_uploader("Uplolad your PDFs here:", accept_multiple_files=True)
-if pdf_docs:
+pdf_docs=st.file_uploader("Uplolad your PDFs here", accept_multiple_files=True)
+if len(pdf_docs) != 0:
     st.write("✅")
 
 # Prompt input
