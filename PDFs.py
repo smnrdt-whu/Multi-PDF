@@ -48,12 +48,15 @@ def get_conversation_chain(vectorstore):
 
 def handle_userinput(user_question):
     response = st.session_state.conversation({'question': user_question})
+    #st.write(response)
     st.session_state.chat_history = response['chat_history']
+    #st.write(st.session_state.chat_history)
     for i, message in enumerate(st.session_state.chat_history):
         if i % 2 == 0:
             st.write(user_template.replace("{{MSG}}", message.content), unsafe_allow_html=True)
         else:
             st.write(bot_template.replace("{{MSG}}", message.content), unsafe_allow_html=True)
+    #st.write(st.session_state.chat_history)
     
 def process_documents():
     # get pdf test
@@ -74,20 +77,26 @@ if "conversation" not in st.session_state:
     st.session_state.conversation = None
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = None
+    if "chat_visibility" not in st.session_state:
+        st.session_state.chat_visibility = False
 
 st.header("Chat with multiple PDFs :books:")
 
 # OpenAI API key input
 key = st.text_input("Please enter your OpenAI API key:")
-if key != "":
-    st.write("✅")
 
-#st.subheader("Your documents")
 pdf_docs=st.file_uploader("Uplolad your PDFs here", accept_multiple_files=True)
-if len(pdf_docs) != 0:
-    st.write("✅")
 
+if st.button("Process"):
+    process_documents()
+    if key != "":
+        st.write("OpenAI API key ✅")
+        if len(pdf_docs) != 0:
+            st.write("PDF upload ✅")
+            st.session_state.chat_visibility = True
+            
 # Prompt input
-user_question = st.text_input("Ask a question about your documents:", on_change=process_documents)
-if user_question:
-    handle_userinput(user_question)
+if st.session_state.chat_visibility:
+    user_question = st.text_input("Ask a question about your documents:")
+    if user_question:
+        handle_userinput(user_question)
