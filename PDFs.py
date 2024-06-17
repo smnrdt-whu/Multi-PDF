@@ -83,7 +83,7 @@ if "chat_history" not in st.session_state:
 st.header("Chat with multiple PDFs :books:")
 
 # OpenAI API key input
-key = st.text_input("Please enter your OpenAI API key:")
+key = st.text_input("Please enter your OpenAI API key:", type="password")
 
 pdf_docs=st.file_uploader("Uplolad your PDFs here", accept_multiple_files=True)
 
