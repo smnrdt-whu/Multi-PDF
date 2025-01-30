@@ -7,13 +7,6 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from htmlTemplates import css, bot_template, user_template
-#import chromadb
-#from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
-
-#https://www.youtube.com/watch?v=dXxQ0LR-3Hg
-#Limitations:
-#1) Abstraction level -> Model doesn't know that it was provided with a specific knowledge base
-#2) Ability to do data synthesis -> Models tends to say it cannot do tasks related to data synthesis
 
 def get_pdf_text(pdf_docs):
     text = ""
@@ -31,8 +24,6 @@ def get_text_chunks(text):
     token_split_texts = []
     for text in chunks:
         token_split_texts += token_splitter.split_text(text)
-    #embedding_function = SentenceTransformerEmbeddingFunction()
-    #chroma_client = chromadb.Client()
     return token_split_texts
 
 def get_vectorstore(text_chunks):
@@ -48,15 +39,12 @@ def get_conversation_chain(vectorstore):
 
 def handle_userinput(user_question):
     response = st.session_state.conversation({'question': user_question})
-    #st.write(response)
     st.session_state.chat_history = response['chat_history']
-    #st.write(st.session_state.chat_history)
     for i, message in enumerate(st.session_state.chat_history):
         if i % 2 == 0:
             st.write(user_template.replace("{{MSG}}", message.content), unsafe_allow_html=True)
         else:
             st.write(bot_template.replace("{{MSG}}", message.content), unsafe_allow_html=True)
-    #st.write(st.session_state.chat_history)
     
 def process_documents():
     # get pdf test
