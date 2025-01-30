@@ -1,9 +1,10 @@
 streamlit==1.37.1
 PyPDF2==3.0.1
-langchain_community==0.3.16
-langchain==0.3.17
-openai==1.55.0
+langchain_community==0.*
+langchain==0.*
+openai==1.*
 tiktoken==0.5.2
 faiss-cpu==1.9.0
 sentence-transformers==3.4.1
 pip==25.0
+langchain-openai==0.*
